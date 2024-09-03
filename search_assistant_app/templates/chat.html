@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .chat-box {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .user {
+            text-align: right;
+        }
+        .bot {
+            text-align: left;
+        }
+        .feedback-buttons {
+            margin-top: 10px;
+            text-align: right;
+        }
+        .feedback-buttons button {
+            margin-left: 5px;
+        }
+    </style>
+    <script>
+        function sendMessage() {
+            const queryInput = document.getElementById('query');
+            const query = queryInput.value.trim();
+            if (query) {
+                displayMessage(query, 'user');
+                queryInput.value = '';
+                fetch('/get_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayMessage(data.answer, 'bot');
+                    addFeedbackButtons(data.query, data.answer);
+                });
+            }
+        }
+
+        function displayMessage(message, sender) {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message ' + sender;
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addFeedbackButtons(query, answer) {
+            const chatBox = document.getElementById('chat-box');
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-buttons';
+            feedbackDiv.innerHTML = `
+                <button onclick="sendFeedback('like', '${query}', '${answer}')">👍 Like</button>
+                <button onclick="sendFeedback('dislike', '${query}', '${answer}')">👎 Dislike</button>
+            `;
+            chatBox.appendChild(feedbackDiv);
+        }
+
+        function sendFeedback(feedbackType, query, answer) {
+            fetch('/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ feedback: feedbackType, query: query, answer: answer }),
+            }).then(response => response.json())
+              .then(data => alert('Feedback received: ' + feedbackType));
+        }
+    </script>
+</head>
+<body>
+    <h1>RAG Chat Interface</h1>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="query" placeholder="Type your query here" onkeypress="if(event.key === 'Enter') sendMessage()">
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>
