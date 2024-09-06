@@ -39,7 +39,7 @@ services:
       timeout: 10s
       retries: 5
   
-  init:
+  es-init:
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,6 +48,16 @@ services:
         condition: service_healthy
 
     entrypoint: ["python", "create_index.py"]
+
+  db-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    entrypoint: ["python", "db_prep.py"]
 
   flask-app:
     build: .

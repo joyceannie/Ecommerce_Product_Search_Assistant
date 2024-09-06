@@ -9,6 +9,8 @@ scikit-learn = "*"
 pandas = "*"
 flask = "*"
 sentence-transformers = "==2.7.0"
+python-dotenv = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 tqdm = "*"
