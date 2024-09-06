@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 def initialize_elasticsearch():
     # Initialize Elasticsearch client
-    es = Elasticsearch(hosts=[{'host': 'elasticsearch', 'port': 9200, 'scheme': 'http'}])
+    es = Elasticsearch("http://elasticsearch:9200")
     if not es.ping():
         raise ValueError("Connection to Elasticsearch failed")
     return es

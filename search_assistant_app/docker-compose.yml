@@ -16,10 +16,25 @@ services:
       - "9300:9300"
     # volumes:
     #   - elasticsearch-data:/usr/share/elasticsearch/data
-    # networks:
-    #   - esnet
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'green'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -33,8 +48,6 @@ services:
         condition: service_healthy
 
     entrypoint: ["python", "create_index.py"]
-    # networks:
-    #   - esnet
 
   flask-app:
     build: .
@@ -45,18 +58,16 @@ services:
     depends_on:
       elasticsearch:  
         condition: service_healthy
-    # entrypoint: ["python", "create_index.py"]  
-    # networks:
-    #   - esnet 
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:5000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
 
-volumes:
-  elasticsearch-data:
-    driver: local
-# networks:
-#   esnet:
-#     driver: bridge
+# volumes:
+#   elasticsearch-data:
+#     driver: local
+#   postgres_data:
+#     driver: local

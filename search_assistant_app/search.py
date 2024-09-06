@@ -38,9 +38,9 @@ def full_text_search(query, es, index_name):
 
 def build_prompt(query, search_results):
     context = ""
-    
-    for doc in search_results:
-        context = context + ENTRY_TEMPLATE.format(**doc['_source']) + "\n\n"
+    if search_results:
+        for doc in search_results:
+            context = context + ENTRY_TEMPLATE.format(**doc['_source']) + "\n\n"
 
     prompt = PROMPT_TEMPLATE.format(question=query, context=context).strip()
     return prompt
