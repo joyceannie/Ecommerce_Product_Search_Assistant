@@ -7,7 +7,7 @@ from elasticsearch import Elasticsearch
 from openai import OpenAI
 from search import rag_answer
 from uuid import uuid4
-from db import save_conversation, save_feedback
+import db
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key') 
@@ -63,23 +63,28 @@ def get_answer():
     session_id = session['session_id']
     session['conversation_count'] += 1
     conversation_id = f"{session_id}_{session['conversation_count']}"
-    answer = rag_answer(user_query, es, index_name, openai_client)
+    answer_data = rag_answer(user_query, es, index_name, openai_client)
     # Save the conversation to the database
-    timestamp = datetime.now()
-    # save_conversation(conversation_id, user_query, answer, timestamp)
-    return jsonify({"query": user_query, "answer": answer})
+    db.save_conversation(
+    conversation_id=conversation_id,
+    question=user_query,
+    answer_data=answer_data,
+    )
+    return jsonify({"query": user_query, "answer": answer_data})
 
 # Route to handle feedback
 @app.route('/feedback', methods=['POST'])
 def feedback():
     data = request.json
-    feedback_type = data.get('feedback')
-    query = data.get('query')
-    answer = data.get('answer')
+    conversation_id = data.get('conversation_id')
+    feedback = data.get('feedback')
+    feedback = 1 if feedback == 'like' else -1
+    # query = data['query']
+    # answer = data['answer']
     
     conversation_id = f"{session['session_id']}_{session['conversation_count']}"
     timestamp = datetime.now()
     # Process the feedback (e.g., save it to a database, log it, etc.)
-    # save_feedback(conversation_id, feedback_type, timestamp)
+    db.save_feedback(conversation_id=conversation_id, feedback=feedback)
 
     return jsonify({"status": "success"})
