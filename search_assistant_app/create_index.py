@@ -4,13 +4,17 @@ import json
 from sentence_transformers import SentenceTransformer
 import logging
 import time
+import os
+from dotenv import load_dotenv
 
 
 logging.basicConfig(level=logging.INFO)
-
+# Load environment variables from .env file
+load_dotenv()
 def initialize_elasticsearch():
     # Initialize Elasticsearch client
-    es = Elasticsearch("http://localhost:9200")
+    ES_HOST = os.getenv('ELASTICSEARCH_HOST', 'http://localhost:9200')
+    es = Elasticsearch(ES_HOST)
     if not es.ping():
         raise ValueError("Connection to Elasticsearch failed")
     return es
@@ -90,7 +94,7 @@ def index_documents(file_name, index_name, es_client, model):
 
                 logging.info(f'Processed {index} documents')
                 
-                if index == 100:
+                if index == 2000:
                     break
 
         # Use bulk indexing for better performance

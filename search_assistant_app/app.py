@@ -20,19 +20,24 @@ load_dotenv()
 # Access environment variables
 openai_key = os.getenv('OPENAI_API_KEY')
 
-# es_host = os.getenv('ELASTIC_URL_LOCAL')
-es_host = os.getenv('ELASTIC_HOST')
-es_port = int(os.getenv('ELASTIC_PORT'))
+ES_HOST = os.getenv('ELASTICSEARCH_HOST', 'http://localhost:9200')
+es = Elasticsearch([ES_HOST])
 index_name = os.getenv('INDEX_NAME')
 
-# Initialize Elasticsearch client
-es = Elasticsearch(
-    hosts=[{
-        'host': es_host,
-        'port': es_port,
-        'scheme': 'http'
-    }]
-)
+
+# # es_host = os.getenv('ELASTIC_URL_LOCAL')
+# es_host = os.getenv('ELASTIC_HOST')
+# es_port = int(os.getenv('ELASTIC_PORT'))
+# index_name = os.getenv('INDEX_NAME')
+
+# # Initialize Elasticsearch client
+# es = Elasticsearch(
+#     hosts=[{
+#         'host': es_host,
+#         'port': es_port,
+#         'scheme': 'http'
+#     }]
+# )
 # es  = Elasticsearch(hosts=[{'host': 'localhost', 'scheme': 'http', 'port': 9200}])
 
 # Optional: Test the connection
