@@ -12,7 +12,7 @@ The datset used for this project is [ecommerce product dataset](https://www.kagg
   <img src="images/sample_product_data.png">
 </p>
 
-The oridginal dataset is stored at [data/data.json](data/data.json)A cleaned version of the data is stored at [`data/cleaned_data.json`](data/cleaned_data.json).
+The original dataset is stored at [data/data.json](data/data.json)A cleaned version of the data is stored at [`data/cleaned_data.json`](data/cleaned_data.json).
 
 ## Technologies
 
@@ -28,7 +28,7 @@ The oridginal dataset is stored at [data/data.json](data/data.json)A cleaned ver
 As OpenAI is used as the LLM, you need to create an OpenAI key in the search_assistant_app/.env file.  The format of the .env file is available in the .env_template file. 
 ## Running the application
 
-You can run the application using docker compose. The app starts elasticsearch server, creates an index, initialize the postgresql database, and then start the flask web app. The user activities are stored in the postgresql database. 
+You can run the application using docker compose. The app starts elasticsearch server, creates an index, initialize the postgresql database, and then start the flask web app. The user activities are stored in the postgresql database. The dataset consists of around 30K records. As it takes a lot of time to build, only a few records are indexed. If you want to add more records, you can edit it in the `search_assistant_app/create_index.py` in line 97. 
 
 ```
 cd search_assistant_app
