@@ -36,8 +36,7 @@ def full_text_search(query, es, index_name):
     for result in response['hits']['hits']:
         return [result]
 
-def build_prompt(query, search_results):
-    context = ""
+def build_prompt(query, search_results, context):
     if search_results:
         for doc in search_results:
             context = context + ENTRY_TEMPLATE.format(**doc['_source']) + "\n\n"
@@ -55,9 +54,9 @@ def llm(prompt, openai_client):
     
     return response.choices[0].message.content
 
-def rag_answer(query, es, index_name, openai_client):
+def rag_answer(query, es, index_name, openai_client, context):
     search_results = full_text_search(query, es, index_name)
-    prompt = build_prompt(query, search_results)
+    prompt = build_prompt(query, search_results, context)
     answer = llm(prompt, openai_client)
     return answer
 

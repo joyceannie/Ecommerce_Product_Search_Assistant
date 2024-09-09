@@ -25,21 +25,6 @@ es = Elasticsearch([ES_HOST])
 index_name = os.getenv('INDEX_NAME')
 
 
-# # es_host = os.getenv('ELASTIC_URL_LOCAL')
-# es_host = os.getenv('ELASTIC_HOST')
-# es_port = int(os.getenv('ELASTIC_PORT'))
-# index_name = os.getenv('INDEX_NAME')
-
-# # Initialize Elasticsearch client
-# es = Elasticsearch(
-#     hosts=[{
-#         'host': es_host,
-#         'port': es_port,
-#         'scheme': 'http'
-#     }]
-# )
-# es  = Elasticsearch(hosts=[{'host': 'localhost', 'scheme': 'http', 'port': 9200}])
-
 # Optional: Test the connection
 try:
     if es.ping():
@@ -59,16 +44,21 @@ def chat():
     if 'session_id' not in session:
         session['session_id'] = str(uuid4())
         session['conversation_count'] = 0
+        session['context'] = ''
     return render_template('chat.html')
 
 # Route to handle chat messages
 @app.route('/get_answer', methods=['POST'])
 def get_answer():
     user_query = request.json.get('query')
-    session_id = session['session_id']
-    session['conversation_count'] += 1
-    conversation_id = f"{session_id}_{session['conversation_count']}"
-    answer_data = rag_answer(user_query, es, index_name, openai_client)
+    session_id = session.get('session_id')
+    context = session.get('context', '') or ''
+    session['conversation_count'] = session.get('conversation_count', 0)  + 1
+    conversation_id = f"{session_id}_{session.get('conversation_count')}"
+    answer_data = rag_answer(user_query, es, index_name, openai_client, context)
+    session['context'] = context + answer_data
+    if len(session.get('context')) > 5000: 
+        session['context'] =session.get('context')[1000:]
     # Save the conversation to the database
     db.save_conversation(
     conversation_id=conversation_id,
