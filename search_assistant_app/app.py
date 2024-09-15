@@ -14,7 +14,6 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')
 
 logging.basicConfig(level=logging.INFO)
 
-
 # Load environment variables from .env file
 load_dotenv()
 # Access environment variables
@@ -37,49 +36,46 @@ except Exception as e:
 
 openai_client = OpenAI()
 
-# Route for the main chat page
-@app.route('/', methods=['GET', 'POST'])
-def chat():
+# Route for rendering the main chatbot page
+@app.route('/')
+def home():
     # Generate a unique session ID if not already set
     if 'session_id' not in session:
         session['session_id'] = str(uuid4())
         session['conversation_count'] = 0
         session['context'] = ''
-    return render_template('chat.html')
+    return render_template('index.html')
 
-# Route to handle chat messages
-@app.route('/get_answer', methods=['POST'])
-def get_answer():
-    user_query = request.json.get('query')
+# Route to handle the search query and return results
+@app.route('/search', methods=['POST'])
+def search():
+    query = request.form.get('query')
     session_id = session.get('session_id')
     context = session.get('context', '') or ''
     session['conversation_count'] = session.get('conversation_count', 0)  + 1
     conversation_id = f"{session_id}_{session.get('conversation_count')}"
-    answer_data = rag_answer(user_query, es, index_name, openai_client, context)
-    session['context'] = context + answer_data
+    results = rag_answer(query, es, index_name, openai_client, context)
+    session['context'] = context + results
     if len(session.get('context')) > 5000: 
         session['context'] =session.get('context')[1000:]
-    # Save the conversation to the database
     db.save_conversation(
     conversation_id=conversation_id,
-    question=user_query,
-    answer_data=answer_data,
+    question=query,
+    answer_data=results,
     )
-    return jsonify({"query": user_query, "answer": answer_data})
+    return render_template('results.html', results=results)
 
-# Route to handle feedback
+# Route to handle feedback submission
 @app.route('/feedback', methods=['POST'])
 def feedback():
-    data = request.json
-    conversation_id = data.get('conversation_id')
-    feedback = data.get('feedback')
-    feedback = 1 if feedback == 'like' else -1
-    # query = data['query']
-    # answer = data['answer']
-    
+    # result_id = request.form.get('result_id')
+    conversation_id = request.form.get('conversation_id')
+    feedback_type = request.form.get('feedback_type')
+    feedback = 1 if feedback_type == 'like' else -1
     conversation_id = f"{session['session_id']}_{session['conversation_count']}"
-    timestamp = datetime.now()
-    # Process the feedback (e.g., save it to a database, log it, etc.)
+    print(f"Received feedback: {feedback_type} for {conversation_id}")
     db.save_feedback(conversation_id=conversation_id, feedback=feedback)
-
     return jsonify({"status": "success"})
+
+if __name__ == '__main__':
+    app.run(debug=True)

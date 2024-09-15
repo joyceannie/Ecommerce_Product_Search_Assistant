@@ -19,7 +19,7 @@ def get_db_connection():
         host=os.getenv("POSTGRES_HOST", "postgres"),
         database=os.getenv("POSTGRES_DB", "products_database"),
         user=os.getenv("POSTGRES_USER", "user1"),
-        password=os.getenv("POSTGRES_PASSWORD", "user_1_pwd"),
+        password=os.getenv("POSTGRES_PASSWORD", "user1_pwd"),
     )
 
 

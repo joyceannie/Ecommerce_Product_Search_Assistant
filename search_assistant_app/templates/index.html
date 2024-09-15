@@ -3,38 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Assistant</title>
-    <script>
-        function sendFeedback(feedbackType) {
-            const query = document.getElementById('query').value;
-            const answer = document.getElementById('answer').innerText;
+    <title>Chatbot Product Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
+        .chat-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f4f4f4;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .user-message {
+            background-color: #e0f7fa;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .input-container button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .input-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chat-container">
+        <!-- Chat messages will be appended here -->
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="query" placeholder="Ask about products..." />
+        <button onclick="sendQuery()">Search</button>
+    </div>
+
+    <script>
+        function sendQuery() {
+            const query = document.getElementById('query').value;
+            if (query.trim() === '') return;
+
+            // Add user query to the chat
+            addMessage(query, 'user-message');
+
+            // Send query to the server
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `query=${query}`
+            }).then(response => response.text())
+              .then(data => {
+                  // Append search results to the chat
+                  document.getElementById('chat-container').innerHTML += data;
+                  document.getElementById('query').value = '';  // Clear input
+                  scrollToBottom();  // Scroll to the latest message
+              });
+        }
+
+        function addMessage(message, className) {
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('chat-message', className);
+            messageContainer.textContent = message;
+            document.getElementById('chat-container').appendChild(messageContainer);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendFeedback(resultId, feedbackType) {
             fetch('/feedback', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify({ feedback: feedbackType, query: query, answer: answer }),
+                body: `result_id=${resultId}&feedback_type=${feedbackType}`
             }).then(response => response.json())
-              .then(data => alert('Feedback received: ' + feedbackType));
+              .then(data => {
+                if (data.status === 'success') {
+                    alert(`Feedback ${feedbackType} submitted.`);
+                }
+            });
         }
     </script>
-</head>
-<body>
-    <h1>Search Assistant</h1>
-    <form method="POST" action="/">
-        <label for="query">Enter your query:</label><br>
-        <input type="text" id="query" name="query" required><br><br>
-        <input type="submit" value="Submit">
-    </form>
-
-    {% if answer %}
-    <div>
-        <h3>Answer:</h3>
-        <p id="answer">{{ answer }}</p>
-        <button onclick="sendFeedback('like')">👍 Like</button>
-        <button onclick="sendFeedback('dislike')">👎 Dislike</button>
-    </div>
-    {% endif %}
 </body>
 </html>
