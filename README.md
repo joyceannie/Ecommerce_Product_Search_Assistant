@@ -5,6 +5,10 @@ Online shopping is a convenient way of shopping which saves a lot of time. Websi
 
 This is a RAG application that can be used to discover ecommerce products for the user. The application uses ElasticSearch to index the documents, and OpenAI to answer the user queries. 
 
+<p align="center">
+  <img src="images/sample_search.png">
+</p>
+
 
 ## Dataset
 The datset used for this project is [ecommerce product dataset](https://www.kaggle.com/datasets/aaditshukla/flipkart-fasion-products-dataset?resource=download). The dataset consists of details of around 30K products from clothing and accessories category. The data is in json format. The data consists of fields like url, name, _id, crawled_at, selling_price, original_price, discount, brand, seller_name, seller_rating, images, product_details, pid, description, out_of_stock, flipkart_assured, breadcrumbs etc. A sample data of products is given below.
@@ -28,7 +32,7 @@ The original dataset is stored at [data/data.json](data/data.json)A cleaned vers
 As OpenAI is used as the LLM, you need to create an OpenAI key in the search_assistant_app/.env file.  The format of the .env file is available in the .env_template file. 
 ## Running the application
 
-You can run the application using docker compose. The app starts elasticsearch server, creates an index, initialize the postgresql database, and then start the flask web app. The user activities are stored in the postgresql database. The dataset consists of around 30K records. As it takes a lot of time to build, only a few records are indexed. If you want to add more records, you can edit it in the `search_assistant_app/create_index.py` in line 97. 
+You can run the application using docker compose. The app starts elasticsearch server, creates an index, initialize the postgresql database, and then start the flask web app. The user activities are stored in the postgresql database. The dataset consists of around 30K records. As it takes a lot of time to build, only a few records are indexed. If you want to add more records, you can edit it in the `search_assistant_app/create_index.py` in line 97. Please note that indexing takes some time. 
 
 ```
 cd search_assistant_app

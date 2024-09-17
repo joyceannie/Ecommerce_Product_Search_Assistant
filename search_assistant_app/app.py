@@ -56,7 +56,7 @@ def search():
     conversation_id = f"{session_id}_{session.get('conversation_count')}"
     results = rag_answer(query, es, index_name, openai_client, context)
     session['context'] = context + results
-    if len(session.get('context')) > 5000: 
+    if len(session.get('context')) > 10000: 
         session['context'] =session.get('context')[1000:]
     db.save_conversation(
     conversation_id=conversation_id,

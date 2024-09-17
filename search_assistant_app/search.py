@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 
 PROMPT_TEMPLATE = """
 You're the product search assistant for an ecommerce website. Answer the QUESTION based on the CONTEXT from our products database.
-Use only the facts from the CONTEXT when answering the QUESTION.
+Use only the facts from the CONTEXT when answering the QUESTION. Don't provide any links to products unless you are asked.
 
 QUESTION: {question}
 
@@ -18,7 +18,8 @@ sub_category: {sub_category}
 brand: {brand}
 average rating: {average_rating}
 url: {url}
-out_of_stock: {out_of_stock}
+out_of_stock: {out_of_stock}, 
+"product_details": {product_details} 
 """.strip()   
 
 def full_text_search(query, es, index_name):
@@ -28,7 +29,7 @@ def full_text_search(query, es, index_name):
             "query": {
                 "multi_match": {
                     "query": query,
-                    "fields": ["title", "description"]
+                    "fields": ["title", "description", "product_details"]
                 }
             }
         }

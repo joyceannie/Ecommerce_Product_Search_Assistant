@@ -94,7 +94,7 @@ def index_documents(file_name, index_name, es_client, model):
 
                 logging.info(f'Processed {index} documents')
                 
-                if index == 300:
+                if index == 7000:
                     break
 
         # Use bulk indexing for better performance
