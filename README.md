@@ -51,7 +51,7 @@ The code for the application is in the [search_assistant_app](search_assistant_a
 * create_index.py: Creates the elasticsearch index.
 * db.py: the logic for logging the requests and responses to postgres.
 * db_prep.py: Contains the script for initializing the backend.
-* search.py: The scipt for the RAG implementation.
+* search.py: The script for the RAG implementation.
 
 ## Ingestion
 
